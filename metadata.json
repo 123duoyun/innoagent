@@ -1,0 +1,6 @@
+{
+  "name": "Inno Agent",
+  "description": "Inno Agent Developer Sandbox manager for creating, booting, and running autonomous agent environments securely.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
