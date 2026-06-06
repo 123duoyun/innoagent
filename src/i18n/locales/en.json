@@ -19,6 +19,7 @@
     "emailLabel": "Email Address",
     "passwordLabel": "Password (6+ chars)",
     "confirmPasswordLabel": "Confirm Password",
+    "inviteCodeLabel": "Invite Code",
     "submit": "Create Account",
     "loading": "Registering...",
     "hasAccount": "Already have an account?",
@@ -29,6 +30,8 @@
       "emailInvalid": "Please enter a valid email address.",
       "passwordLength": "Password must be at least 6 characters long.",
       "passwordMismatch": "Passwords do not match.",
+      "inviteCodeRequired": "Please enter the invite code.",
+      "inviteCodeInvalid": "Invalid invite code.",
       "network": "Registration failed. Please check network and try again."
     }
   },

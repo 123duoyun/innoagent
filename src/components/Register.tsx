@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User as UserIcon, Mail, Lock, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, KeyRound, ArrowRight, Loader2, Ticket } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { registerApi } from '../api/auth';
@@ -16,6 +16,7 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,11 +48,15 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
       setError(t('register.error.passwordMismatch'));
       return;
     }
+    if (!inviteCode.trim()) {
+      setError(t('register.error.inviteCodeRequired'));
+      return;
+    }
 
     setLoading(true);
 
     try {
-      const response = await registerApi(fullName, email, password);
+      const response = await registerApi(fullName, email, password, inviteCode);
 
       if (response.success) {
         setSuccessMsg(`${response.message} ${t('register.successRedirect')}`);
@@ -183,6 +188,28 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
+                required
+                disabled={loading}
+                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
+              />
+            </div>
+          </div>
+
+          {/* Invite Code */}
+          <div className="mt-[10px] flex flex-col gap-[7px]">
+            <label className="font-sans text-[15px] leading-5 font-medium text-brand-primary tracking-[0.02em]" htmlFor="reg-invite">
+              {t('register.inviteCodeLabel')}
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-4 flex items-center text-brand-on-surface-variant pointer-events-none">
+                <Ticket className="w-4 h-4" strokeWidth={1.8} />
+              </span>
+              <input
+                id="reg-invite"
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                placeholder={t('register.inviteCodeLabel')}
                 required
                 disabled={loading}
                 className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"

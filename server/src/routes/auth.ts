@@ -273,6 +273,18 @@ router.post('/auth/password', async (req: Request, res: Response) => {
     return;
   }
 
+  if (mode === 'register') {
+    const inviteCode = req.body?.inviteCode?.trim();
+    if (!inviteCode) {
+      res.status(400).json({ error: '请输入邀请码。' });
+      return;
+    }
+    if (inviteCode !== 's7G2p9') {
+      res.status(400).json({ error: '邀请码无效。' });
+      return;
+    }
+  }
+
   try {
     const tokens =
       mode === 'register'

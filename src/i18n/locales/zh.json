@@ -19,6 +19,7 @@
     "emailLabel": "邮箱地址",
     "passwordLabel": "密码（至少6个字符）",
     "confirmPasswordLabel": "确认密码",
+    "inviteCodeLabel": "邀请码",
     "submit": "创建账号",
     "loading": "注册中...",
     "hasAccount": "已有账号？",
@@ -29,6 +30,8 @@
       "emailInvalid": "请输入有效的邮箱地址。",
       "passwordLength": "密码长度至少为6个字符。",
       "passwordMismatch": "两次输入的密码不一致。",
+      "inviteCodeRequired": "请输入邀请码。",
+      "inviteCodeInvalid": "邀请码无效。",
       "network": "注册失败，请检查网络后重试。"
     }
   },

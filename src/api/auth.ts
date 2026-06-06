@@ -66,12 +66,13 @@ export async function registerApi(
   fullName: string,
   email: string,
   password: string,
+  inviteCode: string,
 ): Promise<{ success: boolean; message: string; user?: User; tokens?: AuthTokens }> {
   try {
     const res = await fetch(`${API_BASE}/auth/password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'register', username: fullName, email, password }),
+      body: JSON.stringify({ mode: 'register', username: fullName, email, password, inviteCode }),
     });
 
     const data = await res.json();
