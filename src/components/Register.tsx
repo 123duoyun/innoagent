@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { User as UserIcon, Mail, Lock, KeyRound, ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { registerApi } from '../mockApi';
+import { useTranslation } from 'react-i18next';
+import { registerApi } from '../api/auth';
 
 interface RegisterProps {
   key?: React.Key;
@@ -10,15 +11,19 @@ interface RegisterProps {
 }
 
 export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps) {
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const feedbackMessage = error ?? successMsg;
+  const feedbackClass = error
+    ? 'border-red-200 bg-red-50 text-red-700'
+    : 'border-green-200 bg-green-50 text-green-700';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,29 +32,29 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
 
     // Validate client-side
     if (!fullName.trim()) {
-      setError('Please enter your full name.');
+      setError(t('register.error.nameRequired'));
       return;
     }
     if (!email.trim() || !email.includes('@')) {
-      setError('Please enter a valid email address.');
+      setError(t('register.error.emailInvalid'));
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+      setError(t('register.error.passwordLength'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError(t('register.error.passwordMismatch'));
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await registerApi({ fullName, email, password });
-      
+      const response = await registerApi(fullName, email, password);
+
       if (response.success) {
-        setSuccessMsg(`${response.message} Redirecting to login...`);
+        setSuccessMsg(`${response.message} ${t('register.successRedirect')}`);
         // Smooth timeout to let the user see success message before navigating back
         setTimeout(() => {
           onRegisterSuccess();
@@ -59,7 +64,7 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
         setLoading(false);
       }
     } catch (err) {
-      setError('Registration failed. Please check network and try again.');
+      setError(t('register.error.network'));
       setLoading(false);
     }
   };
@@ -70,43 +75,41 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full max-w-md relative z-10 px-4"
+      className="w-full max-w-[480px] relative z-10 px-0"
     >
-      <div className="bg-brand-surface-lowest level-2-card border border-brand-outline-variant/60 rounded-xl p-8 flex flex-col gap-6">
-        
+      <div className="bg-brand-surface-lowest level-2-card border border-brand-outline-variant rounded-[14px] px-10 pt-6 pb-6 flex flex-col">
+
         {/* Header Section */}
-        <header className="flex flex-col items-center justify-center border-b border-brand-outline-variant/20 pb-6 text-center">
-          <div className="w-10 h-10 rounded-lg bg-brand-surface-lowest flex items-center justify-center mb-3 border border-brand-outline-variant shadow-sm text-brand-primary">
-            <UserIcon className="w-5 h-5 fill-current" />
+        <header className="flex flex-col items-center justify-center text-center">
+          <div className="w-[56px] h-[56px] bg-brand-primary rounded-[10px] flex items-center justify-center shadow-sm">
+            <span className="font-sans font-semibold text-[26px] leading-none text-white tracking-[-0.02em]">
+              IA
+            </span>
           </div>
-          <h1 className="font-sans font-bold text-2xl text-brand-primary">Inno Agent</h1>
-          <p className="font-sans text-sm text-brand-on-surface-variant">Create a new sandbox account</p>
+          <h1 className="font-sans font-bold text-[28px] leading-[1.15] text-brand-primary mt-[18px]">Inno Agent</h1>
+          <p className="font-sans text-[16px] leading-5 text-brand-on-surface mt-[10px] tracking-[0.02em]">{t('register.subtitle')}</p>
         </header>
 
         {/* Status Messages */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-md p-3 text-xs font-mono flex items-start gap-2">
-            <span className="font-bold">Error:</span> {error}
-          </div>
-        )}
-
-        {successMsg && (
-          <div className="bg-green-50 border border-green-200 text-green-700 rounded-md p-3 text-xs font-mono flex items-start gap-2">
-            <span className="font-bold">Success:</span> {successMsg}
-          </div>
-        )}
+        <div className="mt-1 h-12" aria-live="polite" aria-atomic="true">
+          {feedbackMessage && (
+            <div className={`flex h-full w-full items-center rounded-md border px-4 font-sans text-[14px] leading-5 ${feedbackClass}`}>
+              <span className="truncate">{feedbackMessage}</span>
+            </div>
+          )}
+        </div>
 
         {/* Register Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          
+        <form onSubmit={handleSubmit} className="mt-1 flex flex-col" noValidate>
+
           {/* Full Name */}
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-xs font-medium text-brand-on-surface-variant" htmlFor="reg-name">
-              Full Name
+          <div className="flex flex-col gap-[7px]">
+            <label className="font-sans text-[15px] leading-5 font-medium text-brand-primary tracking-[0.02em]" htmlFor="reg-name">
+              {t('register.nameLabel')}
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-3 flex items-center text-brand-on-surface-variant/70 pointer-events-none">
-                <UserIcon className="w-4 h-4" />
+              <span className="absolute inset-y-0 left-4 flex items-center text-brand-on-surface-variant pointer-events-none">
+                <UserIcon className="w-4 h-4" strokeWidth={1.8} />
               </span>
               <input
                 id="reg-name"
@@ -116,19 +119,19 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
                 placeholder="Jane Doe"
                 required
                 disabled={loading}
-                className="w-full bg-brand-surface h-10 pl-9 pr-3 rounded-md border border-brand-outline-variant focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary font-sans text-sm text-brand-on-surface placeholder:text-brand-on-surface-variant/40 transition-colors disabled:opacity-50"
+                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Email */}
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-xs font-medium text-brand-on-surface-variant" htmlFor="reg-email">
-              Email
+          <div className="mt-[10px] flex flex-col gap-[7px]">
+            <label className="font-sans text-[15px] leading-5 font-medium text-brand-primary tracking-[0.02em]" htmlFor="reg-email">
+              {t('register.emailLabel')}
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-3 flex items-center text-brand-on-surface-variant/70 pointer-events-none">
-                <Mail className="w-4 h-4" />
+              <span className="absolute inset-y-0 left-4 flex items-center text-brand-on-surface-variant pointer-events-none">
+                <Mail className="w-4 h-4" strokeWidth={1.8} />
               </span>
               <input
                 id="reg-email"
@@ -138,59 +141,51 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
                 placeholder="jane@example.com"
                 required
                 disabled={loading}
-                className="w-full bg-brand-surface h-10 pl-9 pr-3 rounded-md border border-brand-outline-variant focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary font-sans text-sm text-brand-on-surface placeholder:text-brand-on-surface-variant/40 transition-colors disabled:opacity-50"
+                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Password */}
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-xs font-medium text-brand-on-surface-variant" htmlFor="reg-pass">
-              Password (6+ chars)
+          <div className="mt-[10px] flex flex-col gap-[7px]">
+            <label className="font-sans text-[15px] leading-5 font-medium text-brand-primary tracking-[0.02em]" htmlFor="reg-pass">
+              {t('register.passwordLabel')}
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-3 flex items-center text-brand-on-surface-variant/70 pointer-events-none">
-                <Lock className="w-4 h-4" />
+              <span className="absolute inset-y-0 left-4 flex items-center text-brand-on-surface-variant pointer-events-none">
+                <Lock className="w-4 h-4" strokeWidth={1.8} />
               </span>
               <input
                 id="reg-pass"
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="w-full bg-brand-surface h-10 pl-9 pr-10 rounded-md border border-brand-outline-variant focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary font-sans text-sm text-brand-on-surface placeholder:text-brand-on-surface-variant/40 transition-colors disabled:opacity-50"
+                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-on-surface-variant/50 hover:text-brand-on-surface-variant transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
             </div>
           </div>
 
           {/* Confirm Password */}
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-xs font-medium text-brand-on-surface-variant" htmlFor="reg-confirm">
-              Confirm Password
+          <div className="mt-[10px] flex flex-col gap-[7px]">
+            <label className="font-sans text-[15px] leading-5 font-medium text-brand-primary tracking-[0.02em]" htmlFor="reg-confirm">
+              {t('register.confirmPasswordLabel')}
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-3 flex items-center text-brand-on-surface-variant/70 pointer-events-none">
-                <KeyRound className="w-4 h-4" />
+              <span className="absolute inset-y-0 left-4 flex items-center text-brand-on-surface-variant pointer-events-none">
+                <KeyRound className="w-4 h-4" strokeWidth={1.8} />
               </span>
               <input
                 id="reg-confirm"
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="w-full bg-brand-surface h-10 pl-9 pr-10 rounded-md border border-brand-outline-variant focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary font-sans text-sm text-brand-on-surface placeholder:text-brand-on-surface-variant/40 transition-colors disabled:opacity-50"
+                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
             </div>
           </div>
@@ -199,16 +194,16 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full bg-brand-primary hover:bg-brand-primary/90 text-on-primary h-10 rounded-md font-mono text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors"
+            className="w-full h-[45px] bg-brand-secondary hover:bg-brand-secondary/90 text-white rounded-[8px] mt-[20px] font-sans text-[15px] font-semibold flex items-center justify-center gap-[13px] cursor-pointer transition-colors shadow-sm disabled:opacity-50"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Registering...
+                {t('register.loading')}
               </>
             ) : (
               <>
-                Create Account
+                {t('register.submit')}
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -216,14 +211,14 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
         </form>
 
         {/* Footer / Link */}
-        <div className="pt-2 text-center border-t border-brand-outline-variant/10">
-          <p className="font-sans text-xs text-brand-on-surface-variant">
-            Already have an account?{' '}
+        <div className="mt-auto text-center pt-5">
+          <p className="font-sans text-[16px] leading-5 text-brand-primary">
+            {t('register.hasAccount')}{' '}
             <button
               onClick={onNavigateToLogin}
-              className="font-mono text-xs font-semibold text-brand-secondary hover:underline cursor-pointer"
+              className="font-sans text-[15px] font-medium text-brand-secondary hover:underline cursor-pointer"
             >
-              Log in
+              {t('register.login')}
             </button>
           </p>
         </div>

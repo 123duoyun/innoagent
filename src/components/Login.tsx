@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Lock, ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { loginApi } from '../mockApi';
+import { useTranslation } from 'react-i18next';
+import { loginApi } from '../api/auth';
 import { User } from '../types';
 
 interface LoginProps {
@@ -11,18 +12,32 @@ interface LoginProps {
 }
 
 export function Login({ onLoginSuccess, onNavigateToRegister }: LoginProps) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const feedbackMessage = error ?? successMsg;
+  const feedbackClass = error
+    ? 'border-red-200 bg-red-50 text-red-700'
+    : 'border-green-200 bg-green-50 text-green-700';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMsg(null);
+
+    if (!email.trim()) {
+      setError(t('login.error.emailRequired'));
+      return;
+    }
+    if (!password) {
+      setError(t('login.error.passwordRequired'));
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -38,16 +53,9 @@ export function Login({ onLoginSuccess, onNavigateToRegister }: LoginProps) {
         setLoading(false);
       }
     } catch (err) {
-      setError('An unexpected error occurrred. Please try again.');
+      setError(t('login.error.unexpected'));
       setLoading(false);
     }
-  };
-
-  // Helper to pre-fill test credentials
-  const fillTestCredentials = () => {
-    setEmail('agent@inno.com');
-    setPassword('123456');
-    setError(null);
   };
 
   return (
@@ -56,48 +64,44 @@ export function Login({ onLoginSuccess, onNavigateToRegister }: LoginProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full max-w-md relative z-10 px-4"
+      className="w-full max-w-[480px] relative z-10 px-0"
     >
-      <div className="bg-brand-surface-lowest level-2-card border border-brand-outline-variant/60 rounded-xl p-8 flex flex-col gap-8">
-        
+      <div className="bg-brand-surface-lowest level-2-card border border-brand-outline-variant rounded-[14px] px-10 pt-10 pb-11 flex min-h-[602px] flex-col">
+
         {/* Branding Header */}
-        <div className="flex flex-col items-center gap-2 text-center">
-          <div className="w-12 h-12 bg-brand-primary rounded-lg flex items-center justify-center shadow-md">
-            <span className="font-sans font-semibold text-xl text-on-primary tracking-tighter">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-[60px] h-[60px] bg-brand-primary rounded-[10px] flex items-center justify-center shadow-sm">
+            <span className="font-sans font-semibold text-[28px] leading-none text-white tracking-[-0.02em]">
               IA
             </span>
           </div>
-          <h1 className="font-sans font-bold text-2xl text-brand-primary mt-2">
+          <h1 className="font-sans font-bold text-[28px] leading-[1.15] text-brand-primary mt-[27px]">
             Inno Agent
           </h1>
-          <p className="font-sans text-sm text-brand-on-surface-variant">
-            Sign in to your workspace
+          <p className="font-sans text-[16px] leading-5 text-brand-on-surface mt-[17px] tracking-[0.02em]">
+            {t('login.subtitle')}
           </p>
         </div>
 
         {/* Status Messages */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-md p-3 text-xs font-mono flex items-start gap-2">
-            <span className="font-bold">Error:</span> {error}
-          </div>
-        )}
-
-        {successMsg && (
-          <div className="bg-green-50 border border-green-200 text-green-700 rounded-md p-3 text-xs font-mono flex items-start gap-2 animate-pulse">
-            <span className="font-bold">Success:</span> {successMsg}
-          </div>
-        )}
+        <div className="mt-2 h-12" aria-live="polite" aria-atomic="true">
+          {feedbackMessage && (
+            <div className={`flex h-full w-full items-center rounded-md border px-4 font-sans text-[14px] leading-5 ${feedbackClass}`}>
+              <span className="truncate">{feedbackMessage}</span>
+            </div>
+          )}
+        </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          
+        <form onSubmit={handleSubmit} className="flex flex-col" noValidate>
+
           {/* Email Field */}
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-xs font-medium text-brand-on-surface" htmlFor="login-email">
-              Email Address
+          <div className="flex flex-col gap-[7px]">
+            <label className="font-sans text-[15px] leading-5 font-medium text-brand-primary tracking-[0.02em]" htmlFor="login-email">
+              {t('login.emailLabel')}
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-on-surface-variant/70 w-4 h-4 pointer-events-none" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-on-surface-variant w-4 h-4 pointer-events-none" strokeWidth={1.8} />
               <input
                 id="login-email"
                 type="email"
@@ -106,45 +110,28 @@ export function Login({ onLoginSuccess, onNavigateToRegister }: LoginProps) {
                 placeholder="agent@inno.com"
                 required
                 disabled={loading}
-                className="w-full bg-brand-surface border border-brand-outline-variant rounded-md pl-10 pr-3 py-2.5 font-sans text-sm text-brand-on-surface placeholder:text-brand-on-surface-variant/40 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
+                className="w-full h-[53px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Password Field */}
-          <div className="flex flex-col gap-1">
-            <div className="flex justify-between items-center w-full">
-              <label className="font-mono text-xs font-medium text-brand-on-surface" htmlFor="login-password">
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={() => alert('Demo Feature: Forgot password can be reset by editing credentials, or simply type default agent@inno.com / 123456')}
-                className="font-mono text-[11px] text-brand-secondary hover:underline transition-all cursor-pointer"
-              >
-                Forgot Password?
-              </button>
-            </div>
+          <div className="mt-[20px] flex flex-col gap-[7px]">
+            <label className="font-sans text-[15px] leading-5 font-medium text-brand-primary tracking-[0.02em]" htmlFor="login-password">
+              {t('login.passwordLabel')}
+            </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-on-surface-variant/70 w-4 h-4 pointer-events-none" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-on-surface-variant w-4 h-4 pointer-events-none" strokeWidth={1.8} />
               <input
                 id="login-password"
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="w-full bg-brand-surface border border-brand-outline-variant rounded-md pl-10 pr-10 py-2.5 font-sans text-sm text-brand-on-surface placeholder:text-brand-on-surface-variant/40 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
+                className="w-full h-[53px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-on-surface-variant/50 hover:text-brand-on-surface-variant transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
             </div>
           </div>
 
@@ -152,45 +139,31 @@ export function Login({ onLoginSuccess, onNavigateToRegister }: LoginProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-brand-secondary hover:bg-brand-secondary/90 text-on-primary rounded-md py-2.5 mt-2 font-mono text-xs font-medium flex justify-center items-center gap-2 cursor-pointer transition-colors shadow-sm disabled:opacity-50"
+            className="w-full h-[45px] bg-brand-secondary hover:bg-brand-secondary/90 text-white rounded-[8px] mt-[30px] font-sans text-[15px] font-semibold flex justify-center items-center gap-[13px] cursor-pointer transition-colors shadow-sm disabled:opacity-50"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Authenticating...
+                {t('login.loading')}
               </>
             ) : (
               <>
-                Login
+                {t('login.submit')}
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </form>
 
-        {/* Built-in quick credentials helper */}
-        <div className="bg-brand-surface-low border border-brand-outline-variant/40 rounded-md p-3 text-center flex flex-col gap-1.5">
-          <p className="font-sans text-[11px] text-brand-on-surface-variant">
-            Testing credentials: <strong className="font-mono text-brand-on-surface">agent@inno.com</strong> / <strong className="font-mono text-brand-on-surface">123456</strong>
-          </p>
-          <button
-            type="button"
-            onClick={fillTestCredentials}
-            className="mx-auto font-mono text-[10px] bg-brand-primary text-on-primary px-2.5 py-1 rounded hover:bg-brand-primary/80 transition-colors uppercase tracking-wider"
-          >
-            Auto Fill
-          </button>
-        </div>
-
         {/* Footer Action */}
-        <div className="text-center pt-2 border-t border-brand-outline-variant/20">
-          <p className="font-sans text-xs text-brand-on-surface-variant">
-            Don't have an account?{' '}
+        <div className="mt-auto text-center pt-9">
+          <p className="font-sans text-[16px] leading-5 text-brand-primary">
+            {t('login.noAccount')}{' '}
             <button
               onClick={onNavigateToRegister}
-              className="text-brand-secondary font-mono text-xs font-semibold hover:underline cursor-pointer"
+              className="text-brand-secondary font-sans text-[15px] font-medium hover:underline cursor-pointer"
             >
-              Sign Up
+              {t('login.signUp')}
             </button>
           </p>
         </div>

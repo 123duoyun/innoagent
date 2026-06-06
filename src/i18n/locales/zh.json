@@ -1,0 +1,65 @@
+{
+  "login": {
+    "subtitle": "登录您的工作区",
+    "emailLabel": "邮箱地址",
+    "passwordLabel": "密码",
+    "submit": "登录",
+    "loading": "登录中...",
+    "noAccount": "没有账号？",
+    "signUp": "注册",
+    "error": {
+      "emailRequired": "请输入邮箱地址。",
+      "passwordRequired": "请输入密码。",
+      "unexpected": "发生未知错误，请重试。"
+    }
+  },
+  "register": {
+    "subtitle": "创建工作区账号",
+    "nameLabel": "姓名",
+    "emailLabel": "邮箱地址",
+    "passwordLabel": "密码（至少6个字符）",
+    "confirmPasswordLabel": "确认密码",
+    "submit": "创建账号",
+    "loading": "注册中...",
+    "hasAccount": "已有账号？",
+    "login": "登录",
+    "successRedirect": "正在跳转到登录页面...",
+    "error": {
+      "nameRequired": "请输入姓名。",
+      "emailInvalid": "请输入有效的邮箱地址。",
+      "passwordLength": "密码长度至少为6个字符。",
+      "passwordMismatch": "两次输入的密码不一致。",
+      "network": "注册失败，请检查网络后重试。"
+    }
+  },
+  "loading": {
+    "sandboxLoading": "正在加载沙箱",
+    "testSandboxLoaded": "测试沙箱已加载。"
+  },
+  "app": {
+    "checkingSession": "正在检查会话..."
+  },
+  "userPanel": {
+    "defaultName": "用户",
+    "menuTitle": "用户菜单",
+    "disconnect": "断开连接",
+    "disconnecting": "断开中..."
+  },
+  "api": {
+    "auth": {
+      "loginFailed": "用户名或密码错误。",
+      "loginSuccess": "登录成功！",
+      "registerFailed": "注册失败，请重试。",
+      "registerSuccess": "注册成功！",
+      "networkError": "网络错误，请重试。"
+    },
+    "sandbox": {
+      "requestFailed": "{{action}} 请求失败。",
+      "unexpectedResponse": "{{action}} 返回了意外的响应。",
+      "missingRetCode": "{{action}} 响应缺少 RetCode。",
+      "missingMessage": "{{action}} 响应缺少 Message。",
+      "startNoId": "启动沙箱未返回 InnoAgentID。",
+      "startSuccess": "沙箱已成功启动！"
+    }
+  }
+}
