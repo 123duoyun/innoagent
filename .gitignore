@@ -7,3 +7,5 @@ coverage/
 .env*
 !.env.example
 实习日志*
+AGENTS.md
+CLAUDE.md
