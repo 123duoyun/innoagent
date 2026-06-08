@@ -71,9 +71,9 @@ async function startOidcFlow(includeAuthBodyInError: boolean): Promise<{
   const authRes = await fetch(createAuthUrl(issuer, codeChallenge, state).toString(), { redirect: 'manual' });
   const location = authRes.headers.get('location');
   if (!location) {
-    if (!includeAuthBodyInError) throw new Error('Failed to create auth request');
+    if (!includeAuthBodyInError) throw new Error('认证请求创建失败');
     const text = await authRes.text();
-    throw new Error(`Failed to create auth request: ${text}`);
+    throw new Error('认证请求创建失败');
   }
 
   const locUrl = new URL(location, issuer);
@@ -82,13 +82,13 @@ async function startOidcFlow(includeAuthBodyInError: boolean): Promise<{
     locUrl.searchParams.get('authRequestID') ||
     locUrl.searchParams.get('authRequestId');
   if (!authRequestID) {
-    throw new Error('No authRequestID in redirect');
+    throw new Error('认证请求创建失败');
   }
 
   return { issuer, codeVerifier, authRequestID };
 }
 
-async function createSession(checks: unknown, errorPrefix: string): Promise<SessionTokens> {
+async function createSession(checks: unknown, errorMsg: string): Promise<SessionTokens> {
   const sessionRes = await fetch(`${getIssuer()}/v2/sessions`, {
     method: 'POST',
     headers: serviceJsonHeaders(),
@@ -96,8 +96,7 @@ async function createSession(checks: unknown, errorPrefix: string): Promise<Sess
   });
 
   if (!sessionRes.ok) {
-    const text = await sessionRes.text();
-    throw new Error(`${errorPrefix}: ${text}`);
+    throw new Error(errorMsg);
   }
 
   return (await sessionRes.json()) as SessionTokens;
@@ -114,13 +113,13 @@ async function finishOidcFlow(
   });
   if (!finRes.ok) {
     const text = await finRes.text();
-    throw new Error(`Failed to finalize auth request: ${text}`);
+    throw new Error('认证流程异常，请重试');
   }
 
   const { callbackUrl } = (await finRes.json()) as { callbackUrl: string };
   const code = new URL(callbackUrl).searchParams.get('code');
   if (!code) {
-    throw new Error('No code in callback');
+    throw new Error('认证流程异常，请重试');
   }
 
   const tokenRes = await fetch(`${flow.issuer}/oauth/v2/token`, {
@@ -135,8 +134,7 @@ async function finishOidcFlow(
     }),
   });
   if (!tokenRes.ok) {
-    const text = await tokenRes.text();
-    throw new Error(`Token exchange failed: ${text}`);
+    throw new Error('认证流程异常，请重试');
   }
 
   return (await tokenRes.json()) as LoginTokens;
@@ -160,7 +158,7 @@ async function loginWithPassword(username: string, password: string): Promise<Lo
   const session = await createSession({
     ...user,
     password: { password },
-  }, 'Invalid credentials');
+  }, '用户名或密码错误');
 
   return finishOidcFlow(flow, session);
 }
@@ -170,7 +168,7 @@ async function loginWithUserIdAndPassword(userId: string, password: string): Pro
   const session = await createSession({
     user: { userId },
     password: { password },
-  }, 'Invalid credentials');
+  }, '用户名或密码错误');
 
   return finishOidcFlow(flow, session);
 }
@@ -228,7 +226,7 @@ async function registerWithPassword(username: string, email: string, password: s
     if (isDuplicateEmailError(normalizedText)) {
       throw new Error('该邮箱已被注册');
     }
-    throw new Error(`Registration failed: ${text}`);
+    throw new Error('注册失败，请稍后重试');
   }
 
   const created = (await createRes.json()) as { userId?: string };
@@ -241,7 +239,7 @@ async function registerWithPassword(username: string, email: string, password: s
   }
 
   if (!created.userId) {
-    throw new Error('Registration succeeded but userId was not returned');
+    throw new Error('注册异常，请重试');
   }
 
   return loginWithUserIdAndPassword(created.userId, password);
@@ -415,7 +413,7 @@ async function registerWithPhone(
     if (isDuplicateUsernameError(text.toLowerCase())) {
       throw new Error('该用户名已存在');
     }
-    throw new Error(`Registration failed: ${text}`);
+    throw new Error('注册失败，请稍后重试');
   }
 
   const created = (await createRes.json()) as { userId?: string };
@@ -428,7 +426,7 @@ async function registerWithPhone(
   }
 
   if (!created.userId) {
-    throw new Error('Registration succeeded but userId was not returned');
+    throw new Error('注册异常，请重试');
   }
 
   return loginWithUserIdAndPassword(created.userId, password);
