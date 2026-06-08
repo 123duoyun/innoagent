@@ -1,0 +1,116 @@
+_format_version: "3.0"
+
+services:
+  - name: zitadel
+    url: http://zitadel:8080
+    routes:
+      - name: zitadel-routes
+        hosts:
+          - __KONG_AUTH_HOST__
+        paths:
+          - /.well-known
+          - /zitadel.
+          - /oauth
+          - /oidc
+          - /v2
+          - /assets/v1
+          - /ui
+          - /resources
+          - /management
+          - /admin
+        methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        strip_path: false
+        preserve_host: true
+
+  - name: zitadel-login
+    url: http://zitadel-login:3000
+    routes:
+      - name: zitadel-login-ui
+        hosts:
+          - __KONG_AUTH_HOST__
+        paths:
+          - /ui/v2/login
+        methods:
+          - GET
+          - POST
+          - OPTIONS
+        strip_path: false
+        preserve_host: true
+
+  - name: auth-backend-api
+    url: http://auth-backend:3000
+    routes:
+      - name: auth-service-api
+        hosts:
+          - __KONG_AUTH_HOST__
+        paths:
+          - /auth
+          - /sms/send
+        methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        strip_path: false
+        preserve_host: true
+        plugins:
+          - name: oidc-jwt-auth
+            config:
+              require_token: false
+              expected_issuer: "http://__KONG_AUTH_HOST__"
+              expected_audience: "376347192782290947"
+
+  - name: inno-agent-frontend
+    url: http://frontend:3001
+    routes:
+      - name: inno-agent-frontend-routes
+        hosts:
+          - __KONG_AUTH_HOST__
+        paths:
+          - /
+        methods:
+          - GET
+          - HEAD
+          - OPTIONS
+        strip_path: false
+        preserve_host: true
+
+plugins:
+  - name: cors
+    config:
+      origins:
+        - "http://__KONG_AUTH_HOST__"
+        - "http://localhost"
+        - "http://127.0.0.1"
+      methods:
+        - GET
+        - HEAD
+        - PUT
+        - PATCH
+        - POST
+        - DELETE
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - Authorization
+      exposed_headers:
+        - Content-Length
+        - Content-Type
+      credentials: false
+      max_age: 3600
+      preflight_continue: false
+
+  

@@ -1,0 +1,126 @@
+services:
+
+  zitadel:
+    restart: always
+    image: "ghcr.io/zitadel/zitadel:${ZITADEL_VERSION:-v4.13.1}"
+    user: "0"
+    command: 'start-from-init --config /zitadel-config.yaml --steps /zitadel-init-steps.yaml --masterkey MasterkeyNeedsToHave32Characters --tlsMode disabled'
+    networks:
+      - internal-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./example-zitadel-config.yaml:/zitadel-config.yaml:ro
+      - ./example-zitadel-init-steps.yaml:/zitadel-init-steps.yaml:ro
+      - zitadel-bootstrap:/zitadel/bootstrap
+
+  zitadel-login:
+    restart: unless-stopped
+    image: "ghcr.io/zitadel/zitadel-login:${ZITADEL_VERSION:-latest}"
+    user: "0"
+    environment:
+      - ZITADEL_API_URL=http://inno.localhost
+      - NEXT_PUBLIC_BASE_PATH=/ui/v2/login
+      - ZITADEL_SERVICE_USER_TOKEN_FILE=/zitadel/bootstrap/login-client.pat
+    depends_on:
+      - zitadel
+      - kong
+    networks:
+      - internal-net
+    volumes:
+      - zitadel-bootstrap:/zitadel/bootstrap:ro
+
+  postgres:
+    image: m.daocloud.io/docker.io/library/postgres:17
+    environment:
+      POSTGRES_DB: educlaw
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d educlaw"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal-net
+
+  kong:
+    image: m.daocloud.io/docker.io/library/kong:3.6
+    environment:
+      - KONG_DATABASE=off
+      - KONG_DECLARATIVE_CONFIG=/tmp/kong.yml
+      - KONG_PROXY_LISTEN=0.0.0.0:80, 0.0.0.0:8000
+      - KONG_AUTH_HOST=${KONG_AUTH_HOST:-inno.localhost}
+      - KONG_PLUGINS=bundled,oidc-jwt-auth
+      - KONG_LUA_PACKAGE_PATH=/usr/local/custom/?.lua;;
+    command: >-
+      sh -c 'awk
+      "{gsub(/__KONG_AUTH_HOST__/,\"$$KONG_AUTH_HOST\"); print}"
+      /etc/kong/kong.yml > /tmp/kong.yml
+      && exec /docker-entrypoint.sh kong docker-start'
+    volumes:
+      - ./kong/kong.yml:/etc/kong/kong.yml:ro
+      - ./kong/plugins:/usr/local/custom/kong/plugins:ro
+    ports:
+      - "${KONG_PROXY_PORT:-80}:80"
+      - "${KONG_ADMIN_PORT:-8001}:8001"
+    networks:
+      internal-net:
+        aliases:
+          - inno.localhost
+    depends_on:
+      - zitadel
+    restart: unless-stopped
+
+  auth-backend:
+    build:
+      context: .
+      dockerfile: auth-backend/Dockerfile
+      platforms:
+        - linux/amd64
+    platform: linux/amd64
+    image: inno-agent-auth:latest
+    environment:
+      - ZITADEL_ISSUER=${ZITADEL_ISSUER:-http://inno.localhost}
+      - ZITADEL_INTERNAL_ISSUER=${ZITADEL_INTERNAL_ISSUER:-http://inno.localhost}
+      - ZITADEL_CLIENT_ID=${ZITADEL_CLIENT_ID}
+      - ZITADEL_LOGIN_REDIRECT_URI=${ZITADEL_LOGIN_REDIRECT_URI:-http://auth-service:3000/auth/callback}
+      - ZITADEL_SERVICE_PAT_FILE=/zitadel/bootstrap/login-client.pat
+      - ZITADEL_PROJECT_ID=${ZITADEL_PROJECT_ID}
+      - ZITADEL_DEFAULT_ROLE_KEY=${ZITADEL_DEFAULT_ROLE_KEY}
+      - ALIYUN_ACCESS_KEY_ID=${ALIYUN_ACCESS_KEY_ID}
+      - ALIYUN_ACCESS_KEY_SECRET=${ALIYUN_ACCESS_KEY_SECRET}
+      - ALIYUN_SMS_SIGN_NAME=${ALIYUN_SMS_SIGN_NAME}
+      - ALIYUN_SMS_TEMPLATE_CODE=${ALIYUN_SMS_TEMPLATE_CODE}
+    volumes:
+      - zitadel-bootstrap:/zitadel/bootstrap:ro
+    networks:
+      - internal-net
+    depends_on:
+      zitadel:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: inno-agent-frontend/Dockerfile
+      platforms:
+        - linux/amd64
+    platform: linux/amd64
+    image: inno-agent-web:latest
+    networks:
+      - internal-net
+    depends_on:
+      - auth-backend
+    restart: unless-stopped
+
+volumes:
+  zitadel-bootstrap:
+
+networks:
+  internal-net:
+    driver: bridge

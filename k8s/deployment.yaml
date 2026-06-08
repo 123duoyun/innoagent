@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inno-agent-web
+  labels:
+    app: inno-agent-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: inno-agent-web
+  template:
+    metadata:
+      labels:
+        app: inno-agent-web
+    spec:
+      containers:
+        - name: inno-agent-web
+          image: crpi-a4e25wq5oddt3z3b.cn-shanghai.personal.cr.aliyuncs.com/educlaw/inno-agent-web:latest
+          ports:
+            - containerPort: 3001
+              name: frontend
+            - containerPort: 3000
+              name: backend
+          envFrom:
+            - configMapRef:
+                name: inno-agent-web-config
+            - secretRef:
+                name: inno-agent-web-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inno-agent-web-service
+spec:
+  selector:
+    app: inno-agent-web
+  ports:
+    - name: frontend
+      port: 80
+      targetPort: 3001
+    - name: backend
+      port: 3000
+      targetPort: 3000
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inno-agent-web-config
+data:
+  AUTH_BACKEND_PORT: "3000"
+  ZITADEL_ISSUER: "http://inno.localhost"
+  ZITADEL_LOGIN_REDIRECT_URI: "http://localhost:3000/auth/callback"
+  APP_URL: "http://localhost:3000"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: inno-agent-web-secrets
+type: Opaque
+stringData:
+  ZITADEL_CLIENT_ID: "YOUR_CLIENT_ID"
+  ZITADEL_SERVICE_PAT: "YOUR_SERVICE_PAT"
+  GEMINI_API_KEY: "YOUR_GEMINI_KEY"

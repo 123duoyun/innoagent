@@ -13,11 +13,11 @@
 ### 安装
 
 ```bash
-# 前端依赖
+# 安装所有依赖（workspace）
 pnpm install
 
-# 后端依赖
-cd server && npm install
+# 或单独安装后端依赖
+cd auth-backend && npm install
 ```
 
 ### 环境变量
@@ -30,11 +30,11 @@ cp .env.example .env
 
 | 变量 | 说明 |
 |---|---|
-| `ZITADEL_ISSUER` | Zitadel 地址（默认 `http://auth.localhost`） |
+| `ZITADEL_ISSUER` | Zitadel 地址（默认 `http://inno.localhost`） |
 | `ZITADEL_CLIENT_ID` | OIDC 客户端 ID |
 | `ZITADEL_LOGIN_REDIRECT_URI` | 后端 OIDC 回调地址 |
 | `ZITADEL_SERVICE_PAT` | 服务账号 Personal Access Token |
-| `AUTH_BACKEND_PORT` | 后端端口（默认 3001） |
+| `AUTH_BACKEND_PORT` | 后端端口（默认 3000） |
 | `VITE_API_BASE` | 前端 API 基础地址（空 = 同源代理） |
 | `VITE_INNO_AGENT_WORKSPACE_URL_TEMPLATE` | 沙箱工作区 URL 模板（`{sandboxId}` 占位符） |
 
@@ -45,8 +45,8 @@ cp .env.example .env
 pnpm dev:all
 
 # 或分别启动
-pnpm dev          # 前端 → http://localhost:3000
-pnpm dev:server   # 后端 → http://localhost:3001
+pnpm dev          # 前端 → http://localhost:3001
+pnpm dev:server   # 后端 → http://localhost:3000
 ```
 
 ### 构建
@@ -60,18 +60,21 @@ pnpm lint      # TypeScript 类型检查
 ## 项目结构
 
 ```
-├── src/                    # React 前端
-│   ├── api/                # API 客户端（auth、innoAgent）
-│   ├── components/         # 页面组件（Login、Register、Loading、ServiceMock）
-│   ├── i18n/               # 国际化（i18next，默认中文）
-│   ├── App.tsx             # 根组件，屏幕状态机
-│   └── types.ts            # TypeScript 类型定义
-├── server/                 # Express 5 后端
+├── inno-agent-frontend/    # React/Vite 前端
+│   ├── src/
+│   │   ├── api/            # API 客户端（auth、innoAgent）
+│   │   ├── components/     # 页面组件（Login、Register、Loading、ServiceMock）
+│   │   ├── i18n/           # 国际化（i18next，默认中文）
+│   │   ├── App.tsx         # 根组件，屏幕状态机
+│   │   └── types.ts        # TypeScript 类型定义
+│   ├── vite.config.ts      # Vite 配置（代理、路径别名）
+│   └── package.json
+├── auth-backend/           # Express 5 后端
 │   └── src/
 │       ├── routes/auth.ts  # 认证路由（登录/注册/登出）
 │       ├── middleware/     # Bearer token 验证
 │       └── services/      # Zitadel API 调用
-└── vite.config.ts          # Vite 配置（代理、路径别名）
+└── pnpm-workspace.yaml    # monorepo workspace 配置
 ```
 
 ## 架构
@@ -79,7 +82,7 @@ pnpm lint      # TypeScript 类型检查
 ### 认证流程（Zitadel BFF）
 
 ```
-浏览器 → POST /auth/password → 后端 (:3001) → Zitadel Session API + OIDC → 返回 tokens
+浏览器 → POST /auth/password → 后端 (:3000) → Zitadel Session API + OIDC → 返回 tokens
 ```
 
 后端执行完整的 OIDC Authorization Code + PKCE 流程，返回 `access_token`、`refresh_token`、`id_token`。前端存储在 `localStorage`。

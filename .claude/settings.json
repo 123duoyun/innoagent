@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/almonster/Documents/zitadel_kong/kong/**)",
+      "Bash(docker exec *)"
+    ]
+  }
+}

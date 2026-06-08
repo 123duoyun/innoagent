@@ -1,0 +1,70 @@
+{
+  "login": {
+    "subtitle": "Sign in to your workspace",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "submit": "Login",
+    "loading": "Authenticating...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up",
+    "error": {
+      "emailRequired": "Please enter your email address.",
+      "passwordRequired": "Please enter your password.",
+      "unexpected": "An unexpected error occurred. Please try again."
+    }
+  },
+  "register": {
+    "subtitle": "Create your workspace account",
+    "nameLabel": "Full Name",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password (6+ chars)",
+    "confirmPasswordLabel": "Confirm Password",
+    "inviteCodeLabel": "Invite Code",
+    "submit": "Create Account",
+    "loading": "Registering...",
+    "hasAccount": "Already have an account?",
+    "login": "Log in",
+    "successRedirect": "Redirecting to login...",
+    "error": {
+      "nameRequired": "Please enter your full name.",
+      "emailInvalid": "Please enter a valid email address.",
+      "passwordLength": "Password must be at least 6 characters long.",
+      "passwordMismatch": "Passwords do not match.",
+      "inviteCodeRequired": "Please enter the invite code.",
+      "inviteCodeInvalid": "Invalid invite code.",
+      "network": "Registration failed. Please check network and try again."
+    }
+  },
+  "loading": {
+    "sandboxLoading": "Loading sandbox",
+    "startFailed": "Sandbox start failed",
+    "startFailedHint": "Please check your network and try again.",
+    "testSandboxLoaded": "Test sandbox loaded."
+  },
+  "app": {
+    "checkingSession": "Checking session..."
+  },
+  "userPanel": {
+    "defaultName": "Agent User",
+    "menuTitle": "User Menu",
+    "disconnect": "Disconnect",
+    "disconnecting": "Disconnecting..."
+  },
+  "api": {
+    "auth": {
+      "loginFailed": "Incorrect username or password.",
+      "loginSuccess": "Login successful!",
+      "registerFailed": "Registration failed. Please try again.",
+      "registerSuccess": "Registration successful!",
+      "networkError": "Network error. Please try again."
+    },
+    "sandbox": {
+      "requestFailed": "{{action}} request failed.",
+      "unexpectedResponse": "Unexpected {{action}} response.",
+      "missingRetCode": "{{action}} response is missing RetCode.",
+      "missingMessage": "{{action}} response is missing Message.",
+      "startNoId": "StartInnoAgent did not return an InnoAgentID.",
+      "startSuccess": "Sandbox active and loaded successfully!"
+    }
+  }
+}
