@@ -42,7 +42,7 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
       setError(t('register.error.emailInvalid'));
       return;
     }
-    if (password.length < 6) {
+    if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password) || !/[^a-zA-Z0-9]/.test(password)) {
       setError(t('register.error.passwordLength'));
       return;
     }

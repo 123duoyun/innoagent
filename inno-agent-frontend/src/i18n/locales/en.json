@@ -17,7 +17,7 @@
     "subtitle": "Create your workspace account",
     "nameLabel": "Full Name",
     "emailLabel": "Email Address",
-    "passwordLabel": "Password (6+ chars)",
+    "passwordLabel": "Password (8+ chars, letters, numbers & symbol)",
     "confirmPasswordLabel": "Confirm Password",
     "inviteCodeLabel": "Invite Code",
     "submit": "Create Account",
@@ -28,7 +28,7 @@
     "error": {
       "nameRequired": "Please enter your full name.",
       "emailInvalid": "Please enter a valid email address.",
-      "passwordLength": "Password must be at least 6 characters long.",
+      "passwordLength": "Password must be at least 8 characters with letters, numbers, and a special character.",
       "passwordMismatch": "Passwords do not match.",
       "inviteCodeRequired": "Please enter the invite code.",
       "inviteCodeInvalid": "Invalid invite code.",
