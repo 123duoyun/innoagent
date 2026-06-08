@@ -24,14 +24,7 @@ interface ZitadelHumanUser {
 }
 
 function issuer(): string {
-  return config.zitadelInternalIssuer.replace(/\/+$/, '');
-}
-
-function pat(): string {
-  if (!config.zitadelServicePat) {
-    throw new Error('ZITADEL_SERVICE_PAT_FILE is not configured or file cannot be read');
-  }
-  return config.zitadelServicePat;
+  return config.zitadelIssuer.replace(/\/+$/, '');
 }
 
 function mapUser(u: ZitadelHumanUser): ZitadelUser | undefined {
@@ -48,7 +41,7 @@ function mapUser(u: ZitadelHumanUser): ZitadelUser | undefined {
 export async function findById(id: string): Promise<ZitadelUser | undefined> {
   if (!id) return undefined;
   const res = await fetch(`${issuer()}/v2/users/${encodeURIComponent(id)}`, {
-    headers: { Authorization: `Bearer ${pat()}` },
+    headers: { Authorization: `Bearer ${config.zitadelServicePat}` },
   });
   if (res.status === 404) return undefined;
   if (!res.ok) {
@@ -64,7 +57,7 @@ export async function searchUsers(queries: unknown[]): Promise<ZitadelHumanUser[
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${pat()}`,
+      Authorization: `Bearer ${config.zitadelServicePat}`,
     },
     body: JSON.stringify({ queries }),
   });
@@ -82,7 +75,7 @@ export async function listAllUsers(): Promise<ZitadelUser[]> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${pat()}`,
+        Authorization: `Bearer ${config.zitadelServicePat}`,
       },
       body: JSON.stringify({
         query: { offset: String(offset), limit: pageSize, asc: true },
@@ -113,7 +106,7 @@ export async function assignUserRole(userId: string, roleKey: string): Promise<v
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${pat()}`,
+      Authorization: `Bearer ${config.zitadelServicePat}`,
     },
     body: JSON.stringify({
       projectId,
@@ -137,7 +130,7 @@ export async function getUserRoles(userId: string): Promise<string[]> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${pat()}`,
+      Authorization: `Bearer ${config.zitadelServicePat}`,
     },
     body: JSON.stringify({
       queries: [

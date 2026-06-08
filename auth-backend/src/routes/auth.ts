@@ -36,7 +36,7 @@ function base64url(buf: Buffer): string {
 }
 
 function getIssuer(): string {
-  return config.zitadelInternalIssuer.replace(/\/+$/, '');
+  return config.zitadelIssuer.replace(/\/+$/, '');
 }
 
 function serviceJsonHeaders(): Record<string, string> {

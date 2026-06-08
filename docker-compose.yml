@@ -85,7 +85,6 @@ services:
     image: inno-agent-auth:latest
     environment:
       - ZITADEL_ISSUER=${ZITADEL_ISSUER:-http://inno.localhost}
-      - ZITADEL_INTERNAL_ISSUER=${ZITADEL_INTERNAL_ISSUER:-http://inno.localhost}
       - ZITADEL_CLIENT_ID=${ZITADEL_CLIENT_ID}
       - ZITADEL_LOGIN_REDIRECT_URI=${ZITADEL_LOGIN_REDIRECT_URI:-http://auth-service:3000/auth/callback}
       - ZITADEL_SERVICE_PAT_FILE=/zitadel/bootstrap/login-client.pat

@@ -9,9 +9,6 @@ export const config = {
   host: process.env.HOST || '0.0.0.0',
   port: parseInt(process.env.PORT || '3000', 10),
   zitadelIssuer: process.env.ZITADEL_ISSUER || '',
-  get zitadelInternalIssuer() {
-    return process.env.ZITADEL_INTERNAL_ISSUER || this.zitadelIssuer;
-  },
   zitadelClientId: process.env.ZITADEL_CLIENT_ID || '',
   zitadelServicePat: readPat(),
   zitadelLoginRedirectUri:
