@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { loginApi } from '../api/auth';
@@ -15,6 +15,7 @@ export function Login({ onLoginSuccess, onNavigateToRegister }: LoginProps) {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,14 +125,22 @@ export function Login({ onLoginSuccess, onNavigateToRegister }: LoginProps) {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-on-surface-variant w-4 h-4 pointer-events-none" strokeWidth={1.8} />
               <input
                 id="login-password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="w-full h-[53px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
+                className="w-full h-[53px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-12 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-on-surface-variant hover:text-brand-on-surface cursor-pointer transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" strokeWidth={1.8} /> : <Eye className="w-4 h-4" strokeWidth={1.8} />}
+              </button>
             </div>
           </div>
 

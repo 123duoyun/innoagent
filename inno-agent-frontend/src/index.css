@@ -35,3 +35,9 @@
 .logo-pulse {
   animation: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Hide browser-native password reveal button */
+input::-ms-reveal,
+input::-webkit-textfield-decoration-container {
+  display: none !important;
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User as UserIcon, Mail, Lock, KeyRound, Loader2, Ticket } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, KeyRound, Eye, EyeOff, Loader2, Ticket } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { registerApi } from '../api/auth';
@@ -16,6 +16,8 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
 
   const [loading, setLoading] = useState(false);
@@ -162,14 +164,22 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
               </span>
               <input
                 id="reg-pass"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
+                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-12 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-on-surface-variant hover:text-brand-on-surface cursor-pointer transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" strokeWidth={1.8} /> : <Eye className="w-4 h-4" strokeWidth={1.8} />}
+              </button>
             </div>
           </div>
 
@@ -184,14 +194,22 @@ export function Register({ onRegisterSuccess, onNavigateToLogin }: RegisterProps
               </span>
               <input
                 id="reg-confirm"
-                type="password"
+                type={showConfirm ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-4 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
+                className="w-full h-[46px] bg-brand-surface border border-brand-outline-variant rounded-[10px] pl-[52px] pr-12 font-sans text-[16px] text-brand-on-surface placeholder:text-brand-on-surface-variant/55 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all disabled:opacity-50"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-on-surface-variant hover:text-brand-on-surface cursor-pointer transition-colors"
+                tabIndex={-1}
+              >
+                {showConfirm ? <EyeOff className="w-4 h-4" strokeWidth={1.8} /> : <Eye className="w-4 h-4" strokeWidth={1.8} />}
+              </button>
             </div>
           </div>
 
